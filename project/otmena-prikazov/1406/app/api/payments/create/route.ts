@@ -1,0 +1,113 @@
+// app/api/payments/create/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { createPayment } from '@/lib/payments/tbank'
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { contractId } = await req.json()
+    if (!contractId) {
+      return NextResponse.json({ error: 'Contract ID required' }, { status: 400 })
+    }
+
+    // Проверяем контракт
+    const contract = await prisma.contract.findFirst({
+      where: {
+        id: contractId,
+        userId: session.user.id
+      }
+    })
+
+    if (!contract) {
+      return NextResponse.json({ error: 'Contract not found' }, { status: 404 })
+    }
+
+    // Проверяем, не был ли уже оплачен
+    const existingPayment = await prisma.payment.findFirst({
+      where: {
+        contractId,
+        status: 'success'
+      }
+    })
+
+    if (existingPayment) {
+      return NextResponse.json({ 
+        error: 'Contract already paid' 
+      }, { status: 400 })
+    }
+
+    // Создаем уникальный OrderId
+    const orderId = `${contractId}-${Date.now()}`
+    
+    // Создаем запись о платеже
+    const payment = await prisma.payment.create({
+      data: {
+        userId: session.user.id,
+        contractId,
+        orderId,
+        amount: 199, // Фиксированная цена
+        status: 'pending',
+        type: 'analysis'
+      }
+    })
+
+    // Создаем платеж в Т-Банк
+    console.log('PAYMENT: Calling createPayment with:', {
+      orderId: payment.orderId,
+      amount: 199,
+      email: session.user.email,
+      description: `Анализ договора: ${contract.filename}`,
+      userId: session.user.id,
+      contractId: contractId.toString()
+    });
+    const result = await createPayment({
+      orderId: payment.orderId,
+      amount: 199,
+      email: session.user.email!,
+      description: `Анализ договора: ${contract.filename}`,
+      userId: session.user.id,
+      contractId: contractId.toString()
+    })
+
+    if (!result.success) {
+      // Удаляем запись о неудачном платеже
+      await prisma.payment.delete({
+        where: { id: payment.id }
+      })
+      
+      console.error('Payment creation failed:', result.error)
+      
+      return NextResponse.json({ 
+        error: result.error || 'Ошибка создания платежа'
+      }, { status: 500 })
+    }
+
+    // Обновляем запись с ID платежа
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: { 
+        paymentId: result.paymentId,
+        status: 'processing'
+      }
+    })
+
+    return NextResponse.json({
+      success: true,
+      paymentUrl: result.paymentUrl,
+      paymentId: result.paymentId
+    })
+
+  } catch (error) {
+    console.error('Payment creation error:', error)
+    return NextResponse.json({ 
+      error: 'Internal server error' 
+    }, { status: 500 })
+  }
+}

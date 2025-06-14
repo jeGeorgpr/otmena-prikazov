@@ -1,0 +1,11 @@
+--- a/app/api/contracts/analyze/route.ts
++++ b/app/api/contracts/analyze/route.ts
+@@ -365,7 +365,7 @@ export async function POST(req: NextRequest) {
+       return NextResponse.json({ 
+         success: true,
+         message: 'Анализ завершён успешно',
+-       //  provider: provider
++        provider: result.provider || provider
+       })
+     } else {
+       return NextResponse.json({ 

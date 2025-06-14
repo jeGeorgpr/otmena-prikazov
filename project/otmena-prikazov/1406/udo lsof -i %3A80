@@ -1,0 +1,19 @@
+[0;1;31m×[0m nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (]8;;file://cv4849007.novalocal/usr/lib/systemd/system/nginx.service/usr/lib/systemd/system/nginx.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;31mfailed[0m (Result: exit-code) since Tue 2025-06-10 20:01:12 MSK; 1min 57s ago
+   Duration: 2min 29.812s
+       Docs: ]8;;man:nginx(8)man:nginx(8)]8;;
+    Process: 352606 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+    Process: 352607 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; [0;1;31m(code=exited, status=1/FAILURE)[0m
+        CPU: 40ms
+
+Jun 10 20:01:11 cv4849007.novalocal nginx[352607]: nginx: [emerg] bind() to 0.0.0.0:443 failed (98: Address already in use)
+Jun 10 20:01:11 cv4849007.novalocal nginx[352607]: nginx: [emerg] bind() to [::]:443 failed (98: Address already in use)
+Jun 10 20:01:12 cv4849007.novalocal nginx[352607]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Jun 10 20:01:12 cv4849007.novalocal nginx[352607]: nginx: [emerg] bind() to [::]:80 failed (98: Address already in use)
+Jun 10 20:01:12 cv4849007.novalocal nginx[352607]: nginx: [emerg] bind() to 0.0.0.0:443 failed (98: Address already in use)
+Jun 10 20:01:12 cv4849007.novalocal nginx[352607]: nginx: [emerg] bind() to [::]:443 failed (98: Address already in use)
+Jun 10 20:01:12 cv4849007.novalocal nginx[352607]: nginx: [emerg] still could not bind()
+Jun 10 20:01:12 cv4849007.novalocal systemd[1]: [0;1;39m[0;1;31m[0;1;39mnginx.service: Control process exited, code=exited, status=1/FAILURE[0m
+Jun 10 20:01:12 cv4849007.novalocal systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mnginx.service: Failed with result 'exit-code'.[0m
+Jun 10 20:01:12 cv4849007.novalocal systemd[1]: [0;1;31m[0;1;39m[0;1;31mFailed to start nginx.service - A high performance web server and a reverse proxy server.[0m

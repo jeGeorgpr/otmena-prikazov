@@ -1,0 +1,25 @@
+# /etc/systemd/system/imyrist.service
+[Unit]
+Description=ImYrist Next.js Application
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/imyrist
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+RestartSec=10
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+# Логирование
+StandardOutput=append:/var/log/imyrist/app.log
+StandardError=append:/var/log/imyrist/error.log
+
+# Лимиты
+LimitNOFILE=4096
+LimitNPROC=512
+
+[Install]
+WantedBy=multi-user.target

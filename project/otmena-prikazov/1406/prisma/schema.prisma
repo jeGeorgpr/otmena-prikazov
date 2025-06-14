@@ -1,0 +1,167 @@
+// prisma/schema.prisma - обновленная версия
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?   // Поле для пароля
+  emailVerified DateTime?
+  settings      Json?     @default("{\"emailNotifications\": true, \"autoDeleteDocs\": false, \"deleteAfterDays\": 7}")
+  createdAt     DateTime  @default(now())
+  balance       Float     @default(0)  // Текущий баланс в рублях
+  isAdmin       Boolean   @default(false) // Флаг администратора
+  
+  accounts      Account[]
+  sessions      Session[]
+  contracts     Contract[]
+  payments      Payment[]
+  transactions  Transaction[]
+  
+  // Транзакции, созданные администратором
+  adminTransactions Transaction[] @relation("AdminTransactions")
+  promoCodeUsages PromoCodeUsage[]
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String
+  type          String   // 'deposit', 'withdraw', 'analysis', 'admin_credit', 'admin_debit', 'refund', 'bonus'
+  amount        Float    // Сумма транзакции (положительная для пополнений, отрицательная для списаний)
+  balance       Float    // Баланс после транзакции
+  description   String?  // Описание транзакции
+  metadata      Json?    // Дополнительные данные
+  createdAt     DateTime @default(now())
+  
+  // Связи
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Опциональные связи
+  contractId    Int?     // Если транзакция связана с анализом
+  contract      Contract? @relation(fields: [contractId], references: [id])
+  
+  paymentId     String?  // Если транзакция связана с платежом
+  payment       Payment? @relation(fields: [paymentId], references: [id])
+  
+  // Поля для администрирования
+  adminId       String?  // ID администратора, который провел операцию
+  admin         User?    @relation("AdminTransactions", fields: [adminId], references: [id])
+  adminNote     String?  // Примечание администратора
+  
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  userId        String
+  contractId    Int?     // Сделано опциональным для пополнений без анализа
+  type          String   @default("analysis") // 'analysis' или 'deposit'
+  orderId       String   @unique
+  paymentId     String?  @unique
+  amount        Float
+  status        String   @default("pending")
+  metadata      Json?    // Добавляем поле metadata
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contract      Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+}
+ 
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Contract {
+  id           Int      @id @default(autoincrement())
+  userId       String
+  filename     String?
+  path         String?
+  status       String   @default("uploaded")
+  role         String?
+  description  String?
+  plainText    String?  @db.Text
+  result       Json?
+  paymentMethod String? // 'balance' или 'card'
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments     Payment[]
+  transactions Transaction[]
+  
+}
+
+model PromoCode {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  type         String   // 'credit', 'percentage', 'discount'
+  value        Float    // Значение (сумма для credit, процент для percentage, сумма скидки для discount)
+  description  String?
+  isActive     Boolean  @default(true)
+  validFrom    DateTime @default(now())
+  validUntil   DateTime?
+  maxUses      Int?     // Максимальное количество использований
+  usageCount   Int      @default(0)
+  isSingleUse  Boolean  @default(true) // Один раз на пользователя
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  usages       PromoCodeUsage[]
+  
+  @@index([code])
+  @@index([isActive])
+}
+
+model PromoCodeUsage {
+  id           String    @id @default(cuid())
+  promoCodeId  String
+  userId       String
+  appliedValue Float     // Примененное значение (может отличаться от value промокода)
+  usedAt       DateTime  @default(now())
+  
+  promoCode    PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([promoCodeId, userId]) // Один промокод на пользователя
+  @@index([userId])
+}

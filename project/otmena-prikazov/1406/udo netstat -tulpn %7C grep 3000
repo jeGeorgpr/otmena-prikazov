@@ -1,0 +1,15 @@
+[0;1;32m●[0m imyrist.service - ImYrist Next.js Application
+     Loaded: loaded (]8;;file://cv4849007.novalocal/etc/systemd/system/imyrist.service/etc/systemd/system/imyrist.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Thu 2025-06-05 23:29:00 MSK; 958ms ago
+   Main PID: 4239 (npm start)
+      Tasks: 19 (limit: 2331)
+     Memory: 38.1M (peak: 38.3M)
+        CPU: 888ms
+     CGroup: /system.slice/imyrist.service
+             ├─[0;38;5;245m4239 "npm start"[0m
+             ├─[0;38;5;245m4296 sh -c "next start"[0m
+             └─[0;38;5;245m4297 node /var/www/imyrist/node_modules/.bin/next start[0m
+
+Jun 05 23:29:00 cv4849007.novalocal systemd[1]: Started imyrist.service - ImYrist Next.js Application.
+Jun 05 23:29:00 cv4849007.novalocal npm[4239]: > imyrist-app@0.1.0 start
+Jun 05 23:29:00 cv4849007.novalocal npm[4239]: > next start

@@ -1,0 +1,18 @@
+○ imyrist.service - ImYrist Next.js Application
+     Loaded: loaded (]8;;file://cv4849007.novalocal/etc/systemd/system/imyrist.service/etc/systemd/system/imyrist.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: inactive (dead) since Fri 2025-06-06 00:26:01 MSK; 2min 5s ago
+   Duration: 3min 3.255s
+    Process: 7901 ExecStart=/usr/bin/npm start (code=killed, signal=TERM)
+   Main PID: 7901 (code=killed, signal=TERM)
+        CPU: 2.373s
+
+Jun 06 00:25:05 cv4849007.novalocal npm[7921]:     name: 'Error'
+Jun 06 00:25:05 cv4849007.novalocal npm[7921]:   },
+Jun 06 00:25:05 cv4849007.novalocal npm[7921]:   providerId: 'email',
+Jun 06 00:25:05 cv4849007.novalocal npm[7921]:   message: 'Connection timeout'
+Jun 06 00:25:05 cv4849007.novalocal npm[7921]: }
+Jun 06 00:26:01 cv4849007.novalocal systemd[1]: Stopping imyrist.service - ImYrist Next.js Application...
+Jun 06 00:26:01 cv4849007.novalocal systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mimyrist.service: Failed to kill control group /system.slice/imyrist.service, ignoring: Invalid argument[0m
+Jun 06 00:26:01 cv4849007.novalocal systemd[1]: imyrist.service: Deactivated successfully.
+Jun 06 00:26:01 cv4849007.novalocal systemd[1]: Stopped imyrist.service - ImYrist Next.js Application.
+Jun 06 00:26:01 cv4849007.novalocal systemd[1]: imyrist.service: Consumed 2.366s CPU time, 118.2M memory peak, 0B memory swap peak.
